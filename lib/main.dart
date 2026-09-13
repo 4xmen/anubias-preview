@@ -10,6 +10,23 @@ import 'package:gui/base/theme.dart';
 import 'package:gui/base/ui_render.dart';
 import 'package:gui/base/page_render.dart';
 
+import 'base/drop_area.dart';
+
+
+WebSocketChannel? OutChannelWs;
+
+bool selectMe( String hash ){
+
+  final message = {
+    'type': 'select',
+    'hash': hash,
+  };
+
+  OutChannelWs?.sink.add(jsonEncode(message));
+  debugPrint(jsonEncode(message));
+  debugPrint(OutChannelWs.toString());
+  return true;
+}
 void main() {
   runApp(AppRoot(design: appDesign));
 }
@@ -68,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // rust server ip
   static const String serverHost = '127.0.0.1';
 
-  WebSocketChannel? _channel;
+  // WebSocketChannel? _channel;
   StreamSubscription? _subscription;
 
   int? _connectedPort;
@@ -116,12 +133,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
       try {
         channel = WebSocketChannel.connect(Uri.parse('ws://$serverHost:$port'));
+        debugPrint(Uri.parse('ws://$serverHost:$port').toString());
 
         // timeout to reconnect
         await channel.ready.timeout(const Duration(milliseconds: 800));
 
+
+
         // connect success
-        _channel = channel;
+        OutChannelWs = channel;
 
         setState(() {
           _connectedPort = port;
@@ -247,7 +267,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     _subscription?.cancel();
-    _channel?.sink.close();
+    OutChannelWs?.sink.close();
 
     super.dispose();
   }
@@ -258,10 +278,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
     const scrollable = false;
 
-    print(_scaffold);
+    // print(_scaffold);
 
     return _scaffold ??
-        Scaffold(body: const Center(child: Text('Waiting for scaffold...')));
+        Scaffold(body: Center(
+            child: DropArea(),
+        ));
   }
 }
 

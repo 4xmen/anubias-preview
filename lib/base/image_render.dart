@@ -6,6 +6,7 @@ import 'package:gui/base/parsers.dart';
 // 3th party
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gui/base/ui_render.dart';
+import 'package:gui/main.dart';
 import 'package:http/http.dart' as http;
 
 // ---------------------------------------------------------------
@@ -76,8 +77,16 @@ class RemoteImage extends StatelessWidget {
 
         image = Padding(
           padding: padding,
-          child: image,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              selectMe(hash);
+            },
+            child: image,
+          ),
         );
+
+
 
         final String? align = _nullableString(props['align']);
 

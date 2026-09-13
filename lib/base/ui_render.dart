@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gui/base/image_render.dart';
 import 'package:gui/base/parsers.dart';
-
+import 'package:gui/main.dart';
 
 class LiveNode extends ChangeNotifier {
   final String hash;
@@ -365,22 +365,25 @@ class RemoteText extends StatelessWidget {
 
         // print(textWidget);
         // Offstage keeps the widget in the tree but does not paint / layout it
-        return Offstage(offstage: !isVisible, child: textWidget);
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            selectMe(hash);
+          },
+          child: Offstage(offstage: !isVisible, child: textWidget),
+        );
       },
     );
   }
 }
 
-
-
 // ---------------------------------------------------------------
 // RemoteAppBar Widget
 // ---------------------------------------------------------------
 // ---------------------------------------------------------------
 // RemoteAppBar Widget
 // ---------------------------------------------------------------
-class RemoteAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
+class RemoteAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String hash;
 
   const RemoteAppBar({
@@ -413,19 +416,16 @@ class RemoteAppBar extends StatelessWidget
         }
 
         final bool isVisible =
-            props['visible'] != false &&
-                props['visible'] != 'false';
+            props['visible'] != false && props['visible'] != 'false';
 
         if (!isVisible) {
           return const SizedBox.shrink();
         }
 
         final bool showBack =
-            props['back'] == true ||
-                props['back'] == 'true';
+            props['back'] == true || props['back'] == 'true';
 
-        final String title =
-            props['title']?.toString() ?? '';
+        final String title = props['title']?.toString() ?? '';
 
         final Color? backgroundColor = parseColor(
           nullableString(props['color']),
@@ -435,37 +435,42 @@ class RemoteAppBar extends StatelessWidget
           nullableString(props['textColor']),
         );
 
-        final List<dynamic> actions =
-        props['actions'] is List
+        final List<dynamic> actions = props['actions'] is List
             ? props['actions'] as List
             : const [];
 
-        return AppBar(
-          automaticallyImplyLeading: false,
-          title: Text(title),
-          backgroundColor: backgroundColor,
-          foregroundColor: foregroundColor,
-          leading: showBack
-              ? IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.arrow_back),
-          )
-              : null,
-          actions: [
-            for (final action in actions)
-              if (action is Map)
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    parseIcon(
-                      action['icon']?.toString() ?? '',
+        return Listener(
+          // Capture pointer events from the entire AppBar,
+          // including title, leading, actions, and empty areas.
+          behavior: HitTestBehavior.opaque,
+
+          onPointerUp: (_) {
+            selectMe(hash);
+          },
+
+          child: AppBar(
+            automaticallyImplyLeading: false,
+            title: Text(title),
+            backgroundColor: backgroundColor,
+            foregroundColor: foregroundColor,
+            leading: showBack
+                ? IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.arrow_back),
+            )
+                : null,
+            actions: [
+              for (final action in actions)
+                if (action is Map)
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      parseIcon(action['icon']?.toString() ?? ''),
                     ),
+                    tooltip: nullableString(action['tooltip']),
                   ),
-                  tooltip: nullableString(
-                    action['tooltip'],
-                  ),
-                ),
-          ],
+            ],
+          ),
         );
       },
     );
