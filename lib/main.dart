@@ -23,8 +23,6 @@ bool selectMe( String hash ){
   };
 
   OutChannelWs?.sink.add(jsonEncode(message));
-  debugPrint(jsonEncode(message));
-  debugPrint(OutChannelWs.toString());
   return true;
 }
 void main() {

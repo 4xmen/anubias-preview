@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gui/base/drop_area.dart';
 import 'package:gui/base/parsers.dart';
 import 'package:gui/base/ui_render.dart';
 
@@ -57,6 +58,7 @@ import 'package:gui/base/ui_render.dart';
 // └── body:
 //     ├── renderNode("text-1")
 //     └── renderNode("column-1")
+//     └── DropArea
 // ---------------------------------------------------------------
 
 class RemoteScaffold extends StatelessWidget {
@@ -297,11 +299,16 @@ class RemoteScaffold extends StatelessWidget {
 
     if (bodyChildren.isNotEmpty) {
       body = Column(
-        children: bodyChildren
-            .map(renderNode)
-            .toList(),
+        children: [
+          ...bodyChildren.map(renderNode),
+          // append drop area
+          DropArea(),
+        ],
       );
     }
+
+
+
 
     // -------------------------------------------------------------
     // Resolve Scaffold special slots.
