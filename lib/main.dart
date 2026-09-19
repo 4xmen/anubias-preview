@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:gui/base/parsers.dart';
+import 'package:gui/web_events.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+
 
 import 'package:gui/base/config.dart';
 import 'package:gui/base/theme.dart';
@@ -12,48 +15,92 @@ import 'package:gui/base/page_render.dart';
 
 import 'base/drop_area.dart';
 
-
 WebSocketChannel? OutChannelWs;
+bool isOnDropEvent = false;
 
-bool selectMe( String hash ){
+bool selectMe(String hash) {
 
-  final message = {
-    'type': 'select',
-    'hash': hash,
-  };
-
+  final message = {'type': 'select', 'hash': hash};
   OutChannelWs?.sink.add(jsonEncode(message));
   return true;
 }
-void main() {
-  runApp(AppRoot(design: appDesign));
+
+bool focusMe(String hash) {
+
+  final message = {'type': 'focus', 'hash': hash};
+  OutChannelWs?.sink.add(jsonEncode(message));
+  return true;
 }
 
+bool blurMe(String hash) {
+
+  final message = {'type': 'blur', 'hash': hash};
+  OutChannelWs?.sink.add(jsonEncode(message));
+  return false;
+}
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  onWindowLoaded(() {
+    print('🔥 WINDOW LOADED');
+  });
+
+
+
+  runApp(AppRoot(design: appDesign));
+}
 class AppRoot extends StatelessWidget {
   final AppDesignConfig design;
 
-  const AppRoot({super.key, required this.design});
+  const AppRoot({
+    super.key,
+    required this.design,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: design,
       builder: (context, _) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: design.theme,
-          home: const MyHomePage(title: 'So far, so Good'),
-          builder: (context, child) {
-            return Directionality(
-              textDirection: design.textDirection,
-              child: child!,
-            );
+        return Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (event) {
+            if (event.kind == PointerDeviceKind.mouse) {
+              print(
+                '🔥 MOUSE DOWN: '
+                    '${event.position.dx}, ${event.position.dy}',
+              );
+            }
           },
+
+          onPointerUp: (event) {
+            if (event.kind == PointerDeviceKind.mouse) {
+              print(
+                '🔥 MOUSE UP: '
+                    '${event.position.dx}, ${event.position.dy}',
+              );
+            }
+          },
+
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: design.theme,
+            home: const MyHomePage(
+              title: 'So far, so Good',
+            ),
+            builder: (context, child) {
+              return Directionality(
+                textDirection: design.textDirection,
+                child: child!,
+              );
+            },
+          ),
         );
       },
     );
   }
 }
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -136,8 +183,6 @@ class _MyHomePageState extends State<MyHomePage> {
         // timeout to reconnect
         await channel.ready.timeout(const Duration(milliseconds: 800));
 
-
-
         // connect success
         OutChannelWs = channel;
 
@@ -171,6 +216,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 // print(payload);
 
                 switch (type) {
+                  case 'DROP_START':
+                    isOnDropEvent = true;
+                    break;
+                  case 'DROP_END':
+                    isOnDropEvent = false;
+                    break;
                   case 'UPDATE_DESIGN':
                     setState(() {
                       if (data['isDark'] != null) {
@@ -278,10 +329,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // print(_scaffold);
 
-    return _scaffold ??
-        Scaffold(body: Center(
-            child: DropArea(),
-        ));
+    return _scaffold ?? Scaffold(body: Center(child: DropArea()));
   }
 }
 
