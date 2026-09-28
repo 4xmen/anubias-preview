@@ -7,7 +7,6 @@ import 'package:gui/base/parsers.dart';
 import 'package:gui/web_events.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-
 import 'package:gui/base/config.dart';
 import 'package:gui/base/theme.dart';
 import 'package:gui/base/ui_render.dart';
@@ -15,51 +14,47 @@ import 'package:gui/base/page_render.dart';
 
 import 'base/drop_area.dart';
 
+const DEBUG_SHOW_LIVE_TREE = false;
+
 WebSocketChannel? OutChannelWs;
 bool isOnDropEvent = false;
 String resourceUrl = '';
-bool selectMe(String hash) {
 
+bool selectMe(String hash) {
   final message = {'type': 'select', 'hash': hash};
   OutChannelWs?.sink.add(jsonEncode(message));
   return true;
 }
 
 bool focusMe(String hash) {
-
   final message = {'type': 'focus', 'hash': hash};
   OutChannelWs?.sink.add(jsonEncode(message));
   return true;
 }
 
 bool blurMe(String hash) {
-
   final message = {'type': 'blur', 'hash': hash};
   OutChannelWs?.sink.add(jsonEncode(message));
   return false;
 }
 
-String fixResourceUrl(String resHash){
-  return resHash.replaceFirst('resource:',resourceUrl);
+String fixResourceUrl(String resHash) {
+  return resHash.replaceFirst('resource:', resourceUrl);
 }
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized(); 
+  WidgetsFlutterBinding.ensureInitialized();
   onWindowLoaded(() {
     print('🔥 WINDOW LOADED');
   });
 
-
-
   runApp(AppRoot(design: appDesign));
 }
+
 class AppRoot extends StatelessWidget {
   final AppDesignConfig design;
 
-  const AppRoot({
-    super.key,
-    required this.design,
-  });
+  const AppRoot({super.key, required this.design});
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +67,7 @@ class AppRoot extends StatelessWidget {
             if (event.kind == PointerDeviceKind.mouse) {
               print(
                 '🔥 MOUSE DOWN: '
-                    '${event.position.dx}, ${event.position.dy}',
+                '${event.position.dx}, ${event.position.dy}',
               );
             }
           },
@@ -81,7 +76,7 @@ class AppRoot extends StatelessWidget {
             if (event.kind == PointerDeviceKind.mouse) {
               print(
                 '🔥 MOUSE UP: '
-                    '${event.position.dx}, ${event.position.dy}',
+                '${event.position.dx}, ${event.position.dy}',
               );
             }
           },
@@ -89,9 +84,7 @@ class AppRoot extends StatelessWidget {
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: design.theme,
-            home: const MyHomePage(
-              title: 'So far, so Good',
-            ),
+            home: const MyHomePage(title: 'So far, so Good'),
             builder: (context, child) {
               return Directionality(
                 textDirection: design.textDirection,
@@ -104,7 +97,6 @@ class AppRoot extends StatelessWidget {
     );
   }
 }
-
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -222,7 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 switch (type) {
                   case 'SET_RESOURCE_URL':
                     resourceUrl = payload['url'];
-                    print('res:'+resourceUrl);
+                    print('res url' + payload['url']);
                     break;
                   case 'DROP_START':
                     isOnDropEvent = true;
@@ -264,7 +256,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     // x.updateForce();
 
                     break;
-
+                  case 'UPDATE_PROP_ON_SINGLE_COMPONENT':
+                    if (data['payload'] is Map) {
+                      data['payload'].forEach((key, value) {
+                        nodeStore.updateProp(
+                          data['hash_id'].toString(),
+                          key,
+                          value,
+                        );
+                      });
+                    }
+                    break;
                   default:
                     // unknown type
                     break;
