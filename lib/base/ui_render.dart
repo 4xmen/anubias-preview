@@ -3,6 +3,7 @@ import 'package:gui/base/image_render.dart';
 import 'package:gui/base/parsers.dart';
 import 'package:gui/main.dart';
 
+
 class LiveNode extends ChangeNotifier {
   final String hash;
   final String type;

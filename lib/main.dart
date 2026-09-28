@@ -17,7 +17,7 @@ import 'base/drop_area.dart';
 
 WebSocketChannel? OutChannelWs;
 bool isOnDropEvent = false;
-
+String resourceUrl = '';
 bool selectMe(String hash) {
 
   final message = {'type': 'select', 'hash': hash};
@@ -39,8 +39,12 @@ bool blurMe(String hash) {
   return false;
 }
 
+String fixResourceUrl(String resHash){
+  return resHash.replaceFirst('resource:',resourceUrl);
+}
+
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); 
   onWindowLoaded(() {
     print('🔥 WINDOW LOADED');
   });
@@ -216,6 +220,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 // print(payload);
 
                 switch (type) {
+                  case 'SET_RESOURCE_URL':
+                    resourceUrl = payload['url'];
+                    print('res:'+resourceUrl);
+                    break;
                   case 'DROP_START':
                     isOnDropEvent = true;
                     break;

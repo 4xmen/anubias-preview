@@ -189,7 +189,7 @@ class _RemoteImageContentState extends State<_RemoteImageContent> {
   }
 
   Future<_RemoteImageData> _loadImage() async {
-    final response = await http.get(Uri.parse(widget.url));
+    final response = await http.get(Uri.parse(fixResourceUrl(widget.url)));
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception(

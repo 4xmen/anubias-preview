@@ -13,7 +13,7 @@ class _DropAreaState extends State<DropArea> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = _hovered && isOnDropEvent ? Colors.grey.shade300 : Colors.grey.shade200;
+    final bgColor = _hovered ? Colors.grey.shade300 : Colors.grey.shade200;
     final bgFocusColor = _hovered && isOnDropEvent ? Colors.lightGreen : Colors.transparent;
 
     return Container(
