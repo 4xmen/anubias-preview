@@ -274,3 +274,35 @@ BoxFit? parseFit(String? value) {
       return null;
   }
 }
+
+// ---------------------------------------------------------------
+// Helper: Parse aliment
+// ---------------------------------------------------------------
+Alignment? parseAlignment(String? value) {
+  if (value == null || value == 'null') {
+    return null;
+  }
+
+  switch (value.toLowerCase()) {
+    case 'topLeft':
+      return Alignment.topLeft;
+    case 'topRight':
+      return Alignment.topRight;
+    case 'topCenter':
+      return Alignment.topCenter;
+    case 'centerLeft':
+      return Alignment.centerLeft;
+    case 'centerRight':
+      return Alignment.centerRight;
+    case 'center':
+      return Alignment.center;
+    case 'bottomLeft':
+      return Alignment.bottomLeft;
+    case 'bottomRight':
+      return Alignment.bottomRight;
+    case 'bottomCenter':
+      return Alignment.bottomCenter;
+    default:
+      return null;
+  }
+}

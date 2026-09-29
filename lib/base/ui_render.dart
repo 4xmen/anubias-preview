@@ -144,6 +144,8 @@ Widget renderNode(String hash) {
       return RemoteAppBar(hash: hash);
     case 'image':
       return RemoteImage(hash: hash);
+    case 'icon':
+      return RemoteIcon(hash: hash);
 
     // ...
     default:
@@ -301,5 +303,56 @@ class RemoteAppBar extends StatelessWidget implements PreferredSizeWidget {
     }else{
       return color;
     }
+  }
+}
+
+
+// ---------------------------------------------------------------
+// RemoteIcon Widget
+// ---------------------------------------------------------------
+class RemoteIcon extends StatelessWidget {
+  final String hash;
+
+  const RemoteIcon({super.key, required this.hash});
+
+  @override
+  Widget build(BuildContext context) {
+    final node = nodeStore.get(hash);
+    if (node == null) return const SizedBox.shrink();
+
+    return ListenableBuilder(
+      listenable: node,
+      builder: (context, _) {
+        final props = node.props;
+
+        final bool isVisible =
+            props['visible'] != false && props['visible'] != 'false';
+
+        final double size = (props['size'] as num?)?.toDouble() ?? 24.0;
+
+        final iconWidget = Padding(
+          padding: parseEdgeInsets(props['padding']?.toString()),
+          child: Icon(
+            parseIcon(props['icon'].toString()),
+            size: size,
+            color: parseColor(props['color']?.toString()),
+          ),
+        );
+
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            selectMe(hash);
+          },
+          child: Opacity(
+            opacity: isVisible ? 1.0 : .25,
+            child: Container(
+              alignment: parseAlignment(props['align'].toString()),
+              child: iconWidget,
+            ),
+          ),
+        );
+      },
+    );
   }
 }
