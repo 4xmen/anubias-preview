@@ -15,10 +15,20 @@ import 'package:http/http.dart' as http;
 class RemoteImage extends StatelessWidget {
   final String hash;
 
-  const RemoteImage({
-    super.key,
-    required this.hash,
-  });
+  const RemoteImage({super.key, required this.hash});
+
+  Widget _buildPlaceholder({double? width, double? height, bool visible = true}) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Center(
+        child: Opacity(
+          opacity: visible ? 1 : .25,
+          child: Icon(Icons.image, color: Colors.grey, size: 150),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,23 +43,13 @@ class RemoteImage extends StatelessWidget {
         final bool isVisible =
             props['visible'] != false && props['visible'] != 'false';
 
-        if (!isVisible) {
-          return const SizedBox.shrink();
-        }
-
         final String? imageUrl = _nullableString(props['image']);
-
-        if (imageUrl == null || imageUrl.isEmpty) {
-          return const SizedBox.shrink();
-        }
 
         final EdgeInsets padding =
             parseEdgeInsets(props['padding']?.toString() ?? '0') ??
-                EdgeInsets.zero;
+            EdgeInsets.zero;
 
-        final BoxFit? fit = parseFit(
-          _nullableString(props['fit']),
-        );
+        final BoxFit? fit = parseFit(_nullableString(props['fit']));
 
         final String? width = _nullableString(props['width']);
         final String? height = _nullableString(props['height']);
@@ -59,6 +59,14 @@ class RemoteImage extends StatelessWidget {
 
         final double? widthFactor = _parsePercent(width);
         final double? heightFactor = _parsePercent(height);
+
+        if (imageUrl == null || imageUrl.isEmpty) {
+          return _buildPlaceholder(
+            width: widthValue,
+            height: heightValue,
+            visible: isVisible,
+          );
+        }
 
         Widget image = _RemoteImageContent(
           url: imageUrl,
@@ -75,40 +83,32 @@ class RemoteImage extends StatelessWidget {
           );
         }
 
-        image = Padding(
-          padding: padding,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              selectMe(hash);
-            },
-            child: image,
+        image = Opacity(
+          opacity: isVisible ? 1.0 : .25,
+          child: Padding(
+            padding: padding,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                selectMe(hash);
+              },
+              child: image,
+            ),
           ),
         );
-
-
 
         final String? align = _nullableString(props['align']);
 
         switch (align) {
           case 'left':
-            return Align(
-              alignment: Alignment.centerLeft,
-              child: image,
-            );
+            return Align(alignment: Alignment.centerLeft, child: image);
 
           case 'right':
-            return Align(
-              alignment: Alignment.centerRight,
-              child: image,
-            );
+            return Align(alignment: Alignment.centerRight, child: image);
 
           case 'center':
           case null:
-            return Align(
-              alignment: Alignment.center,
-              child: image,
-            );
+            return Align(alignment: Alignment.center, child: image);
 
           default:
             return image;
@@ -192,13 +192,10 @@ class _RemoteImageContentState extends State<_RemoteImageContent> {
     final response = await http.get(Uri.parse(fixResourceUrl(widget.url)));
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'Failed to load image: HTTP ${response.statusCode}',
-      );
+      throw Exception('Failed to load image: HTTP ${response.statusCode}');
     }
 
-    final contentType =
-        response.headers['content-type']?.toLowerCase() ?? '';
+    final contentType = response.headers['content-type']?.toLowerCase() ?? '';
 
     return _RemoteImageData(
       bytes: response.bodyBytes,
@@ -212,17 +209,11 @@ class _RemoteImageContentState extends State<_RemoteImageContent> {
       future: _imageFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return SizedBox(
-            width: widget.width,
-            height: widget.height,
-          );
+          return SizedBox(width: widget.width, height: widget.height);
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
-          return SizedBox(
-            width: widget.width,
-            height: widget.height,
-          );
+          return SizedBox(width: widget.width, height: widget.height);
         }
 
         final data = snapshot.data!;
@@ -233,6 +224,7 @@ class _RemoteImageContentState extends State<_RemoteImageContent> {
             width: widget.width,
             height: widget.height,
             fit: widget.fit ?? BoxFit.contain,
+            errorBuilder: (_, __, ___) => _buildPlaceholder(),
           );
         }
 
@@ -241,8 +233,19 @@ class _RemoteImageContentState extends State<_RemoteImageContent> {
           width: widget.width,
           height: widget.height,
           fit: widget.fit,
+          errorBuilder: (_, __, ___) => _buildPlaceholder(),
         );
       },
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: const Center(
+        child: Icon(Icons.image, color: Colors.grey, size: 150),
+      ),
     );
   }
 }
@@ -254,8 +257,5 @@ class _RemoteImageData {
   final Uint8List bytes;
   final String contentType;
 
-  const _RemoteImageData({
-    required this.bytes,
-    required this.contentType,
-  });
+  const _RemoteImageData({required this.bytes, required this.contentType});
 }
