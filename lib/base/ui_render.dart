@@ -3,7 +3,6 @@ import 'package:gui/base/image_render.dart';
 import 'package:gui/base/parsers.dart';
 import 'package:gui/main.dart';
 
-
 class LiveNode extends ChangeNotifier {
   final String hash;
   final String type;
@@ -174,7 +173,7 @@ class RemoteText extends StatelessWidget {
             ? (props['maxLine'] as num).toInt()
             : int.tryParse(props['maxLine']?.toString() ?? '');
 
-        // visible handling with Offstage (cleaner than Visibility in many cases)
+        // visible handling with Opacity (cleaner than Visibility in many cases)
         final bool isVisible =
             props['visible'] != false && props['visible'] != 'false';
 
@@ -193,19 +192,18 @@ class RemoteText extends StatelessWidget {
         );
 
         // print(textWidget);
-        // Offstage keeps the widget in the tree but does not paint / layout it
+        // Opacity keeps the widget in the tree but does not paint / layout it
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
             selectMe(hash);
           },
-          child: Offstage(offstage: !isVisible, child: textWidget),
+          child: Opacity(opacity: isVisible ? 1.0 : .25, child: textWidget),
         );
       },
     );
   }
 }
-
 
 // ---------------------------------------------------------------
 // RemoteAppBar Widget
@@ -213,10 +211,7 @@ class RemoteText extends StatelessWidget {
 class RemoteAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String hash;
 
-  const RemoteAppBar({
-    super.key,
-    required this.hash,
-  });
+  const RemoteAppBar({super.key, required this.hash});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -245,12 +240,11 @@ class RemoteAppBar extends StatelessWidget implements PreferredSizeWidget {
         final bool isVisible =
             props['visible'] != false && props['visible'] != 'false';
 
-        if (!isVisible) {
-          return const SizedBox.shrink();
-        }
+        // if (!isVisible) {
+        //   return const SizedBox.shrink();
+        // }
 
-        final bool showBack =
-            props['back'] == true || props['back'] == 'true';
+        final bool showBack = props['back'] == true || props['back'] == 'true';
 
         final String title = props['title']?.toString() ?? '';
 
@@ -278,22 +272,20 @@ class RemoteAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: AppBar(
             automaticallyImplyLeading: false,
             title: Text(title),
-            backgroundColor: backgroundColor,
+            backgroundColor: _parseBgColor(backgroundColor, isVisible),
             foregroundColor: foregroundColor,
             leading: showBack
                 ? IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.arrow_back),
-            )
+                    onPressed: () {},
+                    icon: const Icon(Icons.arrow_back),
+                  )
                 : null,
             actions: [
               for (final action in actions)
                 if (action is Map)
                   IconButton(
                     onPressed: () {},
-                    icon: Icon(
-                      parseIcon(action['icon']?.toString() ?? ''),
-                    ),
+                    icon: Icon(parseIcon(action['icon']?.toString() ?? '')),
                     tooltip: nullableString(action['tooltip']),
                   ),
             ],
@@ -301,5 +293,13 @@ class RemoteAppBar extends StatelessWidget implements PreferredSizeWidget {
         );
       },
     );
+  }
+
+  Color? _parseBgColor(Color? color, bool visible) {
+    if (!visible) {
+      return Colors.grey.withValues(alpha: .25);
+    }else{
+      return color;
+    }
   }
 }
