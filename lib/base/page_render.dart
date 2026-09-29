@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gui/base/drop_area.dart';
 import 'package:gui/base/parsers.dart';
 import 'package:gui/base/ui_render.dart';
+import 'package:gui/main.dart';
 
 // ---------------------------------------------------------------
 // RemoteScaffold
@@ -256,14 +257,15 @@ class RemoteScaffold extends StatelessWidget {
     // -------------------------------------------------------------
     // Debug information.
     // -------------------------------------------------------------
-    debugPrint('RemoteScaffold created');
-    debugPrint('appBar: $appBarHash');
-    debugPrint('body: $bodyChildren');
-    debugPrint('floatingActionButton: $floatingActionButtonHash');
-    debugPrint('drawer: $drawerHash');
-    debugPrint('endDrawer: $endDrawerHash');
-    debugPrint('bottomNavigationBar: $bottomNavigationBarHash');
-
+    if (DEBUG_TIE_LIST){
+      debugPrint('RemoteScaffold created');
+      debugPrint('appBar: $appBarHash');
+      debugPrint('body: $bodyChildren');
+      debugPrint('floatingActionButton: $floatingActionButtonHash');
+      debugPrint('drawer: $drawerHash');
+      debugPrint('endDrawer: $endDrawerHash');
+      debugPrint('bottomNavigationBar: $bottomNavigationBarHash');
+    }
     // -------------------------------------------------------------
     // Create the page-level Scaffold renderer.
     //
@@ -365,7 +367,9 @@ class RemoteScaffold extends StatelessWidget {
       // All visual nodes that are not Scaffold special slots are
       // rendered here in their original visual order.
       // -----------------------------------------------------------
-      body: body,
+      body: SingleChildScrollView(
+        child: body,
+      ),
 
       // -----------------------------------------------------------
       // Floating Action Button

@@ -15,6 +15,7 @@ import 'package:gui/base/page_render.dart';
 import 'base/drop_area.dart';
 
 const DEBUG_SHOW_LIVE_TREE = false;
+const DEBUG_TIE_LIST = false;
 
 WebSocketChannel? OutChannelWs;
 bool isOnDropEvent = false;
