@@ -217,7 +217,7 @@ class _RemoteImageContentState extends State<_RemoteImageContent> {
             width: widget.width,
             height: widget.height,
             fit: widget.fit ?? BoxFit.contain,
-            errorBuilder: (_, __, ___) => _buildPlaceholder(),
+            errorBuilder: (_, _, _) => _buildPlaceholder(),
           );
         }
 
@@ -226,7 +226,7 @@ class _RemoteImageContentState extends State<_RemoteImageContent> {
           width: widget.width,
           height: widget.height,
           fit: widget.fit,
-          errorBuilder: (_, __, ___) => _buildPlaceholder(),
+          errorBuilder: (_, _, _) => _buildPlaceholder(),
         );
       },
     );

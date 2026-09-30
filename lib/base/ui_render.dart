@@ -146,6 +146,8 @@ Widget renderNode(String hash) {
       return RemoteImage(hash: hash);
     case 'icon':
       return RemoteIcon(hash: hash);
+    case 'preloader':
+      return RemotePreloader(hash: hash);
 
     // ...
     default:
@@ -356,3 +358,56 @@ class RemoteIcon extends StatelessWidget {
     );
   }
 }
+
+
+// ---------------------------------------------------------------
+// RemotePreloader Widget
+// ---------------------------------------------------------------
+class RemotePreloader extends StatelessWidget {
+  final String hash;
+
+  const RemotePreloader({super.key, required this.hash});
+
+  @override
+  Widget build(BuildContext context) {
+    final node = nodeStore.get(hash);
+    if (node == null) return const SizedBox.shrink();
+
+    return ListenableBuilder(
+      listenable: node,
+      builder: (context, _) {
+        final props = node.props;
+
+        final bool isVisible =
+            props['visible'] != false && props['visible'] != 'false';
+
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => selectMe(hash),
+          child: Opacity(
+            opacity: isVisible ? 1.0 : .25,
+            child: Container(
+              alignment: parseAlignmentVertical(
+                props['align']?.toString(),
+              ),
+              padding: parseEdgeInsets(
+                props['padding']?.toString(),
+              ),
+              child: SizedBox(
+                height: (props['height'] as num?)?.toDouble(),
+                width: (props['width'] as num?)?.toDouble(),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    parseColor(props['color']?.toString()) ?? Colors.blue,
+                  ),
+                  strokeWidth:(props['stroke'] as num?)?.toDouble()
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+

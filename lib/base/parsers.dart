@@ -307,7 +307,7 @@ Alignment? parseAlignment(String? value) {
   }
 }
 // ---------------------------------------------------------------
-// Helper: Parse aliment
+// Helper: Parse aliment just vertical
 // ---------------------------------------------------------------
 Alignment? parseAlignmentVertical(String? value) {
   if (value == null || value == 'null') {
