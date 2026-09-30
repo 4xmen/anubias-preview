@@ -306,3 +306,21 @@ Alignment? parseAlignment(String? value) {
       return null;
   }
 }
+// ---------------------------------------------------------------
+// Helper: Parse aliment
+// ---------------------------------------------------------------
+Alignment? parseAlignmentVertical(String? value) {
+  if (value == null || value == 'null') {
+    return null;
+  }
+  switch (value.toLowerCase()) {
+    case 'centerLeft':
+      return Alignment.centerLeft;
+    case 'centerRight':
+      return Alignment.centerRight;
+    case 'center':
+      return Alignment.center;
+    default:
+      return null;
+  }
+}

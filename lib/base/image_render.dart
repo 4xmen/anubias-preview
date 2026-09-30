@@ -17,7 +17,11 @@ class RemoteImage extends StatelessWidget {
 
   const RemoteImage({super.key, required this.hash});
 
-  Widget _buildPlaceholder({double? width, double? height, bool visible = true}) {
+  Widget _buildPlaceholder({
+    double? width,
+    double? height,
+    bool visible = true,
+  }) {
     return SizedBox(
       width: width,
       height: height,
@@ -97,22 +101,11 @@ class RemoteImage extends StatelessWidget {
           ),
         );
 
-        final String? align = _nullableString(props['align']);
 
-        switch (align) {
-          case 'left':
-            return Align(alignment: Alignment.centerLeft, child: image);
-
-          case 'right':
-            return Align(alignment: Alignment.centerRight, child: image);
-
-          case 'center':
-          case null:
-            return Align(alignment: Alignment.center, child: image);
-
-          default:
-            return image;
-        }
+        return Container(
+          alignment: parseAlignmentVertical(props['align']),
+          child: image,
+        );
       },
     );
   }
