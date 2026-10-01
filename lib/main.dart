@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gui/base/parsers.dart';
 import 'package:gui/web_events.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -43,11 +44,34 @@ String fixResourceUrl(String resHash) {
   return resHash.replaceFirst('resource:', resourceUrl);
 }
 
+
+void deleteMe(String hash) {
+  print(
+    'Delete called for: $hash',
+  );
+}
+
+void duplicateMe(String hash) {
+  print(
+    'Duplicate called for: $hash',
+  );
+}
+
+void sortMe(String hash) {
+  print(
+    'Sort called for: $hash',
+  );
+}
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   onWindowLoaded(() {
     print('🔥 WINDOW LOADED');
   });
+
+  // Disable the browser's default right-click context menu.
+  // This allows Flutter to handle right-click events.
+  BrowserContextMenu.disableContextMenu();
 
   runApp(AppRoot(design: appDesign));
 }
@@ -63,24 +87,24 @@ class AppRoot extends StatelessWidget {
       listenable: design,
       builder: (context, _) {
         return Listener(
-          behavior: HitTestBehavior.translucent,
-          onPointerDown: (event) {
-            if (event.kind == PointerDeviceKind.mouse) {
-              print(
-                '🔥 MOUSE DOWN: '
-                '${event.position.dx}, ${event.position.dy}',
-              );
-            }
-          },
-
-          onPointerUp: (event) {
-            if (event.kind == PointerDeviceKind.mouse) {
-              print(
-                '🔥 MOUSE UP: '
-                '${event.position.dx}, ${event.position.dy}',
-              );
-            }
-          },
+          // behavior: HitTestBehavior.translucent,
+          // onPointerDown: (event) {
+          //   if (event.kind == PointerDeviceKind.mouse) {
+          //     print(
+          //       '🔥 MOUSE DOWN: '
+          //       '${event.position.dx}, ${event.position.dy}',
+          //     );
+          //   }
+          // },
+          //
+          // onPointerUp: (event) {
+          //   if (event.kind == PointerDeviceKind.mouse) {
+          //     print(
+          //       '🔥 MOUSE UP: '
+          //       '${event.position.dx}, ${event.position.dy}',
+          //     );
+          //   }
+          // },
 
           child: MaterialApp(
             debugShowCheckedModeBanner: false,

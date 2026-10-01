@@ -6,6 +6,7 @@ import 'package:gui/base/parsers.dart';
 // 3th party
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gui/base/ui_render.dart';
+import 'package:gui/editor/context_menu.dart';
 import 'package:gui/main.dart';
 import 'package:http/http.dart' as http;
 
@@ -95,6 +96,26 @@ class RemoteImage extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               onTap: () {
                 selectMe(hash);
+              },
+              // Triggered when the user right-clicks.
+              onSecondaryTapUp: (details) {
+                showContextMenu(
+                  context: context,
+
+                  // The exact mouse position.
+                  position: details.globalPosition,
+
+                  // Pass the component identity.
+                  hash: hash,
+
+                  // Pass the common action handlers.
+                  onProp: selectMe,
+                  onDelete: deleteMe,
+                  onDuplicate: duplicateMe,
+
+                  // This will be null for Text/Icon/etc.
+                  onSort: null,
+                );
               },
               child: image,
             ),

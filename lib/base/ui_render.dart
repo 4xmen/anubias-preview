@@ -1,6 +1,10 @@
+import 'dart:ui';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gui/base/image_render.dart';
 import 'package:gui/base/parsers.dart';
+import 'package:gui/editor/context_menu.dart';
 import 'package:gui/main.dart';
 
 class LiveNode extends ChangeNotifier {
@@ -202,6 +206,26 @@ class RemoteText extends StatelessWidget {
           onTap: () {
             selectMe(hash);
           },
+          // Triggered when the user right-clicks.
+          onSecondaryTapUp: (details) {
+            showContextMenu(
+              context: context,
+
+              // The exact mouse position.
+              position: details.globalPosition,
+
+              // Pass the component identity.
+              hash: hash,
+
+              // Pass the common action handlers.
+              onProp: selectMe,
+              onDelete: deleteMe,
+              onDuplicate: duplicateMe,
+
+              // This will be null for Text/Icon/etc.
+              onSort: null,
+            );
+          },
           child: Opacity(opacity: isVisible ? 1.0 : .25, child: textWidget),
         );
       },
@@ -269,9 +293,30 @@ class RemoteAppBar extends StatelessWidget implements PreferredSizeWidget {
           // including title, leading, actions, and empty areas.
           behavior: HitTestBehavior.opaque,
 
-          onPointerUp: (_) {
+          onPointerDown: (event) {
+            print("event: $event");
+            // Check whether this was a right mouse button.
+            if (event.kind == PointerDeviceKind.mouse &&
+                event.buttons == kSecondaryMouseButton) {
+
+              showContextMenu(
+                context: context,
+                position: event.position,
+                hash: hash,
+                onProp: selectMe,
+                onDelete: deleteMe,
+                onDuplicate: null,
+                onSort: null,
+              );
+
+              return;
+            }
             selectMe(hash);
+
+
           },
+
+
 
           child: AppBar(
             automaticallyImplyLeading: false,
@@ -346,6 +391,26 @@ class RemoteIcon extends StatelessWidget {
           onTap: () {
             selectMe(hash);
           },
+          // Triggered when the user right-clicks.
+          onSecondaryTapUp: (details) {
+            showContextMenu(
+              context: context,
+
+              // The exact mouse position.
+              position: details.globalPosition,
+
+              // Pass the component identity.
+              hash: hash,
+
+              // Pass the common action handlers.
+              onProp: selectMe,
+              onDelete: deleteMe,
+              onDuplicate: duplicateMe,
+
+              // This will be null for Text/Icon/etc.
+              onSort: null,
+            );
+          },
           child: Opacity(
             opacity: isVisible ? 1.0 : .25,
             child: Container(
@@ -384,6 +449,26 @@ class RemotePreloader extends StatelessWidget {
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => selectMe(hash),
+          // Triggered when the user right-clicks.
+          onSecondaryTapUp: (details) {
+            showContextMenu(
+              context: context,
+
+              // The exact mouse position.
+              position: details.globalPosition,
+
+              // Pass the component identity.
+              hash: hash,
+
+              // Pass the common action handlers.
+              onProp: selectMe,
+              onDelete: deleteMe,
+              onDuplicate: duplicateMe,
+
+              // This will be null for Text/Icon/etc.
+              onSort: null,
+            );
+          },
           child: Opacity(
             opacity: isVisible ? 1.0 : .25,
             child: Container(
