@@ -242,7 +242,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     break;
                   case 'SET_RESOURCE_URL':
                     resourceUrl = payload['url'];
-                    print('res url' + payload['url']);
                     break;
                   case 'DROP_START':
                     isOnDropEvent = true;

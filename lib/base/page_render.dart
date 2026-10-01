@@ -304,8 +304,14 @@ class RemoteScaffold extends StatelessWidget {
         children: [
           ...bodyChildren.map(renderNode),
           // append drop area
-          DropArea(),
+          Center(
+            child: DropArea(),
+          ),
         ],
+      );
+    }else{
+      body = Center(
+        child: DropArea(),
       );
     }
 
