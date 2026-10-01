@@ -3,7 +3,7 @@ name: Build Flutter Web Preview
 on:
   push:
     branches:
-      - main
+      - master
 
 permissions:
   contents: write
