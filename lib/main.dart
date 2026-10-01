@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:gui/base/parsers.dart';
 import 'package:gui/web_events.dart';
@@ -43,7 +45,6 @@ bool blurMe(String hash) {
 String fixResourceUrl(String resHash) {
   return resHash.replaceFirst('resource:', resourceUrl);
 }
-
 
 void deleteMe(String hash) {
   final message = {'type': 'delete', 'hash': hash};
@@ -130,6 +131,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // screenshot key
+  final GlobalKey _screenshotKey = GlobalKey();
   StatelessWidget? _sample;
 
   static const List<int> candidatePorts = [
@@ -234,6 +237,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 // print(payload);
 
                 switch (type) {
+                  case 'SCREENSHOT':
+                    takeScreenshot();
+                    break;
                   case 'SET_RESOURCE_URL':
                     resourceUrl = payload['url'];
                     print('res url' + payload['url']);
@@ -361,7 +367,41 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // print(_scaffold);
 
-    return _scaffold ?? Scaffold(body: Center(child: DropArea()));
+    return RepaintBoundary(
+      key: _screenshotKey,
+      child: _scaffold ?? Scaffold(body: Center(child: DropArea())),
+    );
+  }
+
+  /// screenshot data
+  Future<void> takeScreenshot() async {
+    try {
+      final boundary =
+          _screenshotKey.currentContext!.findRenderObject()
+              as RenderRepaintBoundary;
+
+      final image = await boundary.toImage(pixelRatio: 2.0);
+
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+
+      if (byteData == null) {
+        print('Failed to create PNG');
+        return;
+      }
+
+      final Uint8List bytes = byteData.buffer.asUint8List();
+
+      sendScreenshot(bytes);
+      // print('==========================');
+      // print('Screenshot created!');
+      // print('Bytes: ${bytes.length}');
+      // print('Width: ${image.width}');
+      // print('Height: ${image.height}');
+      // print('==========================');
+    } catch (e, stackTrace) {
+      print('Screenshot error: $e');
+      print(stackTrace);
+    }
   }
 }
 
@@ -404,3 +444,31 @@ class _MyHomePageState extends State<MyHomePage> {
 //     ),
 //   ),
 // );
+
+
+
+void sendScreenshot(Uint8List screenshot) {
+  const signature = 'SCRN';
+
+  final signatureBytes = Uint8List.fromList(
+    signature.codeUnits,
+  );
+
+  final packet = Uint8List(
+    signatureBytes.length + screenshot.length,
+  );
+
+  packet.setRange(
+    0,
+    signatureBytes.length,
+    signatureBytes,
+  );
+
+  packet.setRange(
+    signatureBytes.length,
+    packet.length,
+    screenshot,
+  );
+
+  OutChannelWs?.sink.add(packet);
+}
