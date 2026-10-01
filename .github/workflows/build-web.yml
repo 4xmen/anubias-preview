@@ -1,0 +1,87 @@
+name: Build Flutter Web Preview
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Flutter Web
+        run: flutter build web --release
+
+      - name: Create ZIP
+        id: zip
+        shell: bash
+        run: |
+          # Short commit hash
+          HASH="${GITHUB_SHA::7}"
+
+          # Get latest release tag
+          TAG=$(gh release view --json tagName --jq '.tagName')
+
+          echo "Latest release: $TAG"
+          echo "Commit: $HASH"
+
+          # Make tag safe for a filename
+          SAFE_TAG=$(echo "$TAG" | sed 's/[^a-zA-Z0-9._-]/-/g')
+
+          ZIP_NAME="preview-${SAFE_TAG}-${HASH}.zip"
+
+          cd build
+          zip -r "../${ZIP_NAME}" web
+
+          echo "zip_name=${ZIP_NAME}" >> "$GITHUB_OUTPUT"
+
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove old preview assets
+        shell: bash
+        run: |
+          TAG=$(gh release view --json tagName --jq '.tagName')
+
+          echo "Updating release: $TAG"
+
+          gh release view "$TAG" \
+            --json assets \
+            --jq '.assets[].name' |
+          while read -r asset; do
+            if [[ "$asset" == preview-*.zip ]]; then
+              echo "Deleting old asset: $asset"
+              gh release delete-asset "$TAG" "$asset" --yes
+            fi
+          done
+
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload new preview
+        run: |
+          TAG=$(gh release view --json tagName --jq '.tagName')
+
+          gh release upload \
+            "$TAG" \
+            "${{ steps.zip.outputs.zip_name }}" \
+            --clobber
+
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
