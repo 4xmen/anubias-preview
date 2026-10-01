@@ -46,21 +46,18 @@ String fixResourceUrl(String resHash) {
 
 
 void deleteMe(String hash) {
-  print(
-    'Delete called for: $hash',
-  );
+  final message = {'type': 'delete', 'hash': hash};
+  OutChannelWs?.sink.add(jsonEncode(message));
 }
 
 void duplicateMe(String hash) {
-  print(
-    'Duplicate called for: $hash',
-  );
+  final message = {'type': 'duplicate', 'hash': hash};
+  OutChannelWs?.sink.add(jsonEncode(message));
 }
 
 void sortMe(String hash) {
-  print(
-    'Sort called for: $hash',
-  );
+  final message = {'type': 'sort', 'hash': hash};
+  OutChannelWs?.sink.add(jsonEncode(message));
 }
 
 void main() {
