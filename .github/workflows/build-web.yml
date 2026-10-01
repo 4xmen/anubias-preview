@@ -37,6 +37,9 @@ jobs:
 
           # Get latest release tag
           TAG=$(gh release view --json tagName --jq '.tagName')
+          
+          # Date: YYYY-MM-DD
+          DATE=$(date -u +"%Y-%m-%d")
 
           echo "Latest release: $TAG"
           echo "Commit: $HASH"
@@ -44,7 +47,7 @@ jobs:
           # Make tag safe for a filename
           SAFE_TAG=$(echo "$TAG" | sed 's/[^a-zA-Z0-9._-]/-/g')
 
-          ZIP_NAME="preview-${SAFE_TAG}-${HASH}.zip"
+          ZIP_NAME="preview-${SAFE_TAG}-${DATE}-${HASH}.zip"
 
           cd build
           zip -r "../${ZIP_NAME}" web
