@@ -7,3 +7,9 @@ This port assume in anubias-app for dev mode
 ```bash
 flutter run -d chrome --web-port=8090 --base-href /preview/ 
 ```
+
+## how build
+
+```bash
+flutter build web --base-href /web/
+```

@@ -27,7 +27,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Flutter Web
-        run: flutter build web --release
+        run: flutter build web --release --base-href /web/
 
       - name: Create ZIP
         id: zip
@@ -48,7 +48,7 @@ jobs:
           # Make tag safe for a filename
           SAFE_TAG=$(echo "$TAG" | sed 's/[^a-zA-Z0-9._-]/-/g')
 
-          ZIP_NAME="preview-${SAFE_TAG}-${DATE}-${HASH}.zip"
+          ZIP_NAME="anubias-preview-${SAFE_TAG}-${DATE}-${HASH}.zip"
 
           cd build
           zip -r "../${ZIP_NAME}" web
